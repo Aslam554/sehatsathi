@@ -18,9 +18,9 @@ import {
   Phone,
   MapPin,
   Droplets,
-  Radio,
-} from "lucide-react";
-
+  Sparkles,
+  HandHeart,
+} from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -202,6 +202,11 @@ const Community = () => {
                       </Button>
                     </div>
                   ))}
+                  {bloodDonors.length === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      No donors listed yet. Encourage community members to register.
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -240,6 +245,11 @@ const Community = () => {
                       </Button>
                     </div>
                   ))}
+                  {firstAidVolunteers.length === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      No first-aid volunteers added yet.
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -280,6 +290,11 @@ const Community = () => {
                       </Button>
                     </div>
                   ))}
+                  {riders.length === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      No riders registered yet. Invite local bike / auto owners.
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>

@@ -325,7 +325,7 @@ const Queues = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div>
+                  <div className="space-y-2">
                     <Label>Select Hospital</Label>
                     <Select
                       value={selectedHospital}
@@ -342,13 +342,23 @@ const Queues = () => {
                         ))}
                       </SelectContent>
                     </Select>
+                    {selectedHospitalData && (
+                      <p className="text-xs text-muted-foreground">
+                        Current queue:{' '}
+                        <span className="font-medium">
+                          {selectedHospitalData.currentQueue} patients
+                        </span>{' '}
+                        • Avg wait ~
+                        <span className="font-medium">{selectedHospitalData.avgWaitTime} min</span>
+                      </p>
+                    )}
                   </div>
 
                   {selectedHospitalData && (
-                    <div>
+                    <div className="space-y-2">
                       <Label>Department</Label>
                       <Select value={selectedDept} onValueChange={setSelectedDept}>
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-background/80">
                           <SelectValue placeholder="Choose department" />
                         </SelectTrigger>
                         <SelectContent>
@@ -362,7 +372,7 @@ const Queues = () => {
                     </div>
                   )}
 
-                  <div>
+                  <div className="space-y-2">
                     <Label>Patient Name</Label>
                     <Input
                       value={patientName}
@@ -371,7 +381,7 @@ const Queues = () => {
                     />
                   </div>
 
-                  <div>
+                  <div className="space-y-2">
                     <Label>Phone Number</Label>
                     <Input
                       value={patientPhone}
@@ -388,8 +398,13 @@ const Queues = () => {
                     }
                     className="w-full"
                   >
+                    <Ticket className="h-4 w-4" />
                     Book Token
                   </Button>
+
+                  <p className="text-[11px] text-muted-foreground text-center">
+                    You&apos;ll receive your token ID and estimated wait time instantly.
+                  </p>
                 </div>
               </CardContent>
             </Card>

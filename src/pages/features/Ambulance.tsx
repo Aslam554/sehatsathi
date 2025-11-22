@@ -1,34 +1,43 @@
 import { useState, useEffect } from "react";
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+import { ambulances, villages, hospitals } from "@/lib/mockData";
+
+import {
   Ambulance as AmbulanceIcon,
   Phone,
   MapPin,
   Navigation,
-  Timer,
+  Clock,
   Activity,
-  Route,
-  Play,
-  Pause
+  AlertTriangle,
 } from "lucide-react";
 
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-
-import { ambulances, villages, hospitals } from "@/lib/mockData";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 const Ambulance = () => {
-  const [open, setOpen] = useState(false);
+  const [emergencyOpen, setEmergencyOpen] = useState(false);
   const [patientLocation, setPatientLocation] = useState("");
   const [nearestHospital, setNearestHospital] = useState("");
-  const [simulation, setSimulation] = useState(null);
-  const [progress, setProgress] = useState(0); // route progress 0–100
-  const [isRunning, setIsRunning] = useState(false);
+  const [simulation, setSimulation] = useState<any>(null);
 
-  const getStatusVariant = (status) => {
+  const getStatusVariant = (status: string) => {
     switch (status) {
       case "available":
         return "ok";
@@ -37,151 +46,87 @@ const Ambulance = () => {
       case "offline":
         return "critical";
       default:
-        return "default";
+        return "secondary";
     }
   };
 
-  // ---------------------------------------------
-  // 🚑 AUTO MOVEMENT SIMULATION (progress bar)
-  // ---------------------------------------------
-  useEffect(() => {
-    if (!isRunning) return;
-
-    const interval = setInterval(() => {
-      setProgress((p) => {
-        if (p >= 100) {
-          setIsRunning(false);
-          return 100;
-        }
-        return p + 2;
-      });
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, [isRunning]);
-
-  // ---------------------------------------------
-  // 🚑 SIMULATION START HANDLER
-  // ---------------------------------------------
   const handleSimulate = () => {
-    const amb = ambulances.find((a) => a.status === "available");
-    if (amb && patientLocation && nearestHospital) {
-      setSimulation({
-        ambulance: amb,
-        patientLocation,
-        hospital: hospitals.find((h) => h.id === nearestHospital)?.name,
-        route: [
-          `🚑 Ambulance departing from ${amb.location}`,
-          `📍 Picking patient at ${villages.find((v) => v.id === patientLocation)?.name}`,
-          `🏥 Heading to ${hospitals.find((h) => h.id === nearestHospital)?.name}`,
-          `✔ Patient safely reached hospital`
-        ]
-      });
+    const availableAmbulance = ambulances.find(
+      (a) => a.status === "available"
+    );
 
-      setProgress(0);
-      setIsRunning(true);
-      setOpen(false);
+    if (availableAmbulance && patientLocation && nearestHospital) {
+      setSimulation({
+        ambulance: availableAmbulance,
+        patientLocation,
+        hospital:
+          hospitals.find((h) => h.id === nearestHospital)?.name || "Hospital",
+        eta: "12 minutes",
+        route: [
+          `Start from ${availableAmbulance.location}`,
+          `Pick up patient from ${
+            villages.find((v) => v.id === patientLocation)?.name
+          }`,
+          `Transport to ${
+            hospitals.find((h) => h.id === nearestHospital)?.name
+          }`,
+        ],
+      });
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#eef7ea] via-[#e5f0d6] to-[#d9e7c4]">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* HEADER */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="bg-green-700 p-3 rounded-xl shadow-md">
-            <AmbulanceIcon className="h-6 w-6 text-white" />
+        <div className="flex items-center gap-3 mb-6">
+          <div className="bg-primary p-3 rounded-xl">
+            <AmbulanceIcon className="h-6 w-6 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-4xl font-bold text-[#2f4f32]">Smart Ambulance Mesh</h1>
-            <p className="text-[#4e633d]">Realtime routing • ETA tracking • Village emergency dispatch</p>
+            <h1 className="text-3xl lg:text-4xl font-bold text-foreground">
+              Smart Ambulance Mesh
+            </h1>
+            <p className="text-muted-foreground">
+              Real-time ambulance tracking and emergency dispatch
+            </p>
           </div>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* LEFT – Ambulance List */}
+          {/* LEFT — AMBULANCE LIST */}
           <div>
-            <div className="flex justify-between mb-4">
-              <h2 className="text-xl font-semibold text-[#2f4f32]">Available Ambulances</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">
+              Available Ambulances
+            </h2>
 
-              {/* Emergency Modal */}
-              <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                  <Button className="bg-red-600 hover:bg-red-700">
-                    <AmbulanceIcon className="mr-2 h-4 w-4" />
-                    Simulate Emergency
-                  </Button>
-                </DialogTrigger>
-
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Simulate Emergency Dispatch</DialogTitle>
-                  </DialogHeader>
-
-                  <div className="space-y-4 pt-2">
-                    <div>
-                      <Label>Patient Location</Label>
-                      <Select value={patientLocation} onValueChange={setPatientLocation}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select village" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {villages.map((v) => (
-                            <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label>Nearest Hospital</Label>
-                      <Select value={nearestHospital} onValueChange={setNearestHospital}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select hospital" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {hospitals.map((h) => (
-                            <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <Button
-                      className="w-full bg-green-700 hover:bg-green-800"
-                      disabled={!patientLocation || !nearestHospital}
-                      onClick={handleSimulate}
-                    >
-                      Start Simulation
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            {/* Ambulance List */}
             <div className="space-y-4">
-              {ambulances.map((a) => (
-                <Card key={a.id} className="shadow hover:shadow-xl transition-all bg-white/80 backdrop-blur">
+              {ambulances.map((ambulance) => (
+                <Card key={ambulance.id} className="hover:shadow-lg transition">
                   <CardContent className="p-6">
-                    <div className="flex justify-between mb-2">
-                      <h3 className="text-lg font-semibold">{a.vehicleNumber}</h3>
-                      <Badge variant={getStatusVariant(a.status)}>
-                        {a.status.toUpperCase()}
-                      </Badge>
+                    <div className="flex justify-between mb-3">
+                      <div>
+                        <h3 className="font-semibold text-lg">
+                          {ambulance.vehicleNumber}
+                        </h3>
+                        <Badge variant={getStatusVariant(ambulance.status)}>
+                          {ambulance.status.toUpperCase()}
+                        </Badge>
+                      </div>
                     </div>
 
                     <div className="space-y-2 text-sm">
-                      <p className="flex gap-2 items-center text-[#3f4b2f]">
-                        <MapPin className="h-4 w-4 text-green-600" />
-                        {a.location}
-                      </p>
+                      <div className="flex gap-2">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <span>{ambulance.location}</span>
+                      </div>
 
-                      <p className="flex gap-2 items-center text-[#3f4b2f]">
-                        <Phone className="h-4 w-4 text-green-600" />
-                        {a.driver} • {a.contact}
-                      </p>
+                      <div className="flex gap-2">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <span>
+                          {ambulance.driver} • {ambulance.contact}
+                        </span>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -189,113 +134,110 @@ const Ambulance = () => {
             </div>
           </div>
 
-          {/* RIGHT – Simulation + Route Tracker */}
+          {/* RIGHT — EMERGENCY SIMULATION */}
           <div>
-            <Card className="shadow-xl bg-white/80 backdrop-blur border border-green-200">
+            <Card className="h-full">
               <CardHeader>
-                <CardTitle>Emergency Route</CardTitle>
-                <CardDescription>Live simulation timeline</CardDescription>
+                <CardTitle>Emergency Route Simulation</CardTitle>
+                <CardDescription>
+                  See how ambulance will reach your location
+                </CardDescription>
               </CardHeader>
 
               <CardContent>
+                {/* FORM */}
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <Label>Patient Location (Village)</Label>
+                    <Select
+                      value={patientLocation}
+                      onValueChange={setPatientLocation}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select village" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {villages.map((v) => (
+                          <SelectItem key={v.id} value={v.id}>
+                            {v.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label>Nearest Hospital</Label>
+                    <Select
+                      value={nearestHospital}
+                      onValueChange={setNearestHospital}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select hospital" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {hospitals.map((h) => (
+                          <SelectItem key={h.id} value={h.id}>
+                            {h.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Button
+                    onClick={handleSimulate}
+                    disabled={!patientLocation || !nearestHospital}
+                    className="w-full"
+                  >
+                    Run Simulation
+                  </Button>
+                </div>
+
+                {/* RESULTS */}
                 {simulation ? (
-                  <div className="space-y-6">
-
-                    {/* LIVE STATUS BOX */}
-                    <div className="bg-green-100 border border-green-600/30 rounded-xl p-4 shadow-sm">
-                      <p className="text-green-800 font-semibold flex items-center gap-2">
-                        <Activity className="h-4 w-4" />
-                        Live Dispatch Status
+                  <div className="space-y-4">
+                    <div className="bg-success/10 border border-success/20 p-4 rounded-lg">
+                      <p className="font-medium text-success">✓ Ambulance Assigned</p>
+                      <p className="text-sm">
+                        {simulation.ambulance.vehicleNumber} dispatched
                       </p>
-
-                      <p className="text-sm mt-1 text-green-900">
-                        {progress < 100
-                          ? `Ambulance en route... (${progress}%)`
-                          : "Patient safely reached hospital ✔"}
-                      </p>
+                      <p className="text-sm">ETA: {simulation.eta}</p>
                     </div>
 
-                    {/* TIMELINE STEPS */}
                     <div>
-                      <ol className="space-y-3 text-sm">
-                        {simulation.route.map((step, i) => (
+                      <p className="font-medium mb-2">Route:</p>
+                      <ol className="space-y-2">
+                        {simulation.route.map((step: string, idx: number) => (
                           <li
-                            key={i}
-                            className={`flex items-start gap-3 ${
-                              i * 33 <= progress ? "text-green-800" : "text-gray-500"
-                            }`}
+                            key={idx}
+                            className="flex items-start gap-2 text-sm"
                           >
-                            <span
-                              className={`
-                                h-6 w-6 flex items-center justify-center rounded-full text-xs
-                                ${
-                                  i * 33 <= progress
-                                    ? "bg-green-700 text-white"
-                                    : "bg-gray-300 text-gray-600"
-                                }
-                              `}
-                            >
-                              {i + 1}
+                            <span className="bg-primary text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
+                              {idx + 1}
                             </span>
-                            {step}
+                            <span>{step}</span>
                           </li>
                         ))}
                       </ol>
                     </div>
 
-                    {/* MOVING ROUTE TRACKER */}
-                    <div className="relative h-32 bg-[url('https://i.imgur.com/1Q9Z1Z1.png')] bg-cover rounded-xl overflow-hidden border border-green-400 shadow-md">
-                      {/* Road Line */}
-                      <div className="absolute top-1/2 left-4 right-4 h-1 bg-green-900/60"></div>
-
-                      {/* Moving dot */}
-                      <div
-                        className="absolute top-1/2 -translate-y-1/2 h-6 w-6 bg-green-600 rounded-full border-2 border-white shadow-lg transition-all"
-                        style={{ left: `${progress}%` }}
-                      ></div>
-                    </div>
-
-                    {/* ETA */}
-                    <div className="text-center">
-                      <p className="text-sm text-gray-600">Estimated Time</p>
-                      <p className="text-3xl font-bold text-green-700">
-                        {progress < 100 ? `${Math.max(2, 15 - Math.floor(progress / 7))} min` : "Arrived"}
-                      </p>
-                    </div>
-
-                    {/* Controls */}
-                    <div className="flex gap-3">
-                      <Button onClick={() => setIsRunning(!isRunning)} className="flex-1">
-                        {isRunning ? (
-                          <>
-                            <Pause className="h-4 w-4 mr-2" /> Pause
-                          </>
-                        ) : (
-                          <>
-                            <Play className="h-4 w-4 mr-2" /> Resume
-                          </>
-                        )}
-                      </Button>
-
-                      <Button
-                        variant="outline"
-                        className="flex-1"
-                        onClick={() => {
-                          setSimulation(null);
-                          setProgress(0);
-                          setIsRunning(false);
-                        }}
-                      >
-                        Clear
-                      </Button>
-                    </div>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setSimulation(null)}
+                    >
+                      Clear Simulation
+                    </Button>
                   </div>
                 ) : (
-                  // IF NO SIMULATION
-                  <div className="flex flex-col items-center justify-center h-64">
-                    <Navigation className="h-14 w-14 text-green-700 mb-4" />
-                    <p className="text-gray-600 mb-4">No active emergency simulation</p>
-                    <Button onClick={() => setOpen(true)}>Start Simulation</Button>
+                  <div className="flex flex-col items-center justify-center h-64 text-center">
+                    <div className="bg-accent p-6 rounded-full mb-4">
+                      <Navigation className="h-12 w-12 text-primary" />
+                    </div>
+                    <p className="text-muted-foreground">
+                      No simulation running yet
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -303,19 +245,6 @@ const Ambulance = () => {
           </div>
         </div>
       </div>
-
-      {/* Animation */}
-      <style>
-        {`
-          @keyframes slide {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-          }
-          .animate-slide {
-            animation: slide .4s ease-out;
-          }
-        `}
-      </style>
     </div>
   );
 };
