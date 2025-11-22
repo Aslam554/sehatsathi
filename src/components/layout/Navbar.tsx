@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Heart, Menu, X } from 'lucide-react';
+import { Heart, Menu, X, Bot } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 
@@ -11,12 +11,16 @@ const Navbar = () => {
     { name: 'Dashboard', path: '/dashboard' },
     { name: 'Emergency', path: '/features/ambulance' },
     { name: 'Wellness', path: '/wellness' },
+
+    // ⭐ NEW — AI Assistant
+    { name: 'AI Assistant', path: '/ai-assistant', icon: Bot },
   ];
 
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
+          
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
             <div className="bg-primary p-2 rounded-xl group-hover:scale-110 transition-transform">
@@ -34,11 +38,13 @@ const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+                className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors"
               >
+                {link.icon && <link.icon className="h-4 w-4 text-primary" />}
                 {link.name}
               </Link>
             ))}
+
             <Button asChild size="sm">
               <Link to="/features/community">Join Network</Link>
             </Button>
@@ -65,11 +71,13 @@ const Navbar = () => {
                 key={link.path}
                 to={link.path}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block px-4 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-lg transition-colors"
               >
+                {link.icon && <link.icon className="h-4 w-4 text-primary" />}
                 {link.name}
               </Link>
             ))}
+
             <div className="px-4 pt-2">
               <Button asChild className="w-full" size="sm">
                 <Link to="/features/community" onClick={() => setMobileMenuOpen(false)}>

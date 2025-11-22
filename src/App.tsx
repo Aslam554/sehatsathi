@@ -15,6 +15,7 @@ import Disaster from "./pages/features/Disaster";
 import Community from "./pages/features/Community";
 import Wellness from "./pages/Wellness";
 import NotFound from "./pages/NotFound";
+import AIAssitant from "./pages/AIAssitant"
 
 const queryClient = new QueryClient();
 
@@ -37,7 +38,10 @@ const App = () => (
               <Route path="/features/disaster" element={<Disaster />} />
               <Route path="/features/community" element={<Community />} />
               <Route path="/wellness" element={<Wellness />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+
+              {/* NEW ROUTE */}
+              <Route path="/ai-assistant" element={<AIAssitant />} />
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

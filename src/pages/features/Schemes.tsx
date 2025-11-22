@@ -5,7 +5,43 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { schemes } from '@/lib/mockData';
-import { ShieldCheck, FileText, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { ShieldCheck, FileText, CheckCircle2, XCircle, AlertCircle, ExternalLink } from 'lucide-react';
+
+// 🔹 GOVT TOP 4 SCHEMES (Static Data)
+const govtSchemes = [
+  {
+    name: "Ayushman Bharat - PMJAY",
+    short: "Har garib pariwar ko 5 lakh tak ka ilaj muft.",
+    eligibility: "BPL/SECC list families.",
+    benefit: "₹5,00,000 tak ka cashless treatment.",
+    link: "https://pmjay.gov.in",
+    color: "from-green-100 to-green-50",
+  },
+  {
+    name: "Janani Suraksha Yojana (JSY)",
+    short: "Safe delivery aur maa-bachche ki suraksha.",
+    eligibility: "Pregnant women (BPL / SC-ST).",
+    benefit: "₹1400–₹2000 delivery support.",
+    link: "https://nhm.gov.in",
+    color: "from-emerald-100 to-emerald-50",
+  },
+  {
+    name: "PM Matru Vandana Yojana (PMMVY)",
+    short: "गर्भवती महिलाओं को आर्थिक सहायता.",
+    eligibility: "पहली बार maa ban rahi women.",
+    benefit: "₹5,000 maternity benefit.",
+    link: "https://pmmvy.gov.in",
+    color: "from-orange-100 to-orange-50",
+  },
+  {
+    name: "Rashtriya Bal Swasthya Karyakram (RBSK)",
+    short: "0–18 saal ke bachchon ka full health checkup.",
+    eligibility: "School/Anganwadi children.",
+    benefit: "Heart, eyes, disability, anemia check.",
+    link: "https://nhm.gov.in",
+    color: "from-blue-100 to-blue-50",
+  },
+];
 
 const Schemes = () => {
   const [aadhaar, setAadhaar] = useState('');
@@ -14,10 +50,9 @@ const Schemes = () => {
 
   const handleCheck = () => {
     if (aadhaar.length >= 12) {
-      // Mock eligibility check
       const results = schemes.map(scheme => ({
         ...scheme,
-        eligible: Math.random() > 0.3, // Random eligibility for demo
+        eligible: Math.random() > 0.3,
         documentsNeeded: Math.random() > 0.5 ? ['Income Certificate', 'Residence Proof'] : [],
       }));
       setEligibilityResults(results);
@@ -28,25 +63,54 @@ const Schemes = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="bg-primary p-3 rounded-xl">
-              <ShieldCheck className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-foreground">
-                Government Scheme Eligibility
-              </h1>
-              <p className="text-muted-foreground">
-                Check which health schemes you qualify for
-              </p>
-            </div>
+
+        {/* ------------------------------------------------------- */}
+        {/* TOP SECTION: MAIN GOVERNMENT SCHEMES */}
+        {/* ------------------------------------------------------- */}
+        <div className="mb-12">
+          <h1 className="text-4xl font-extrabold text-[#2f4f32] text-center">
+            🏛️ Government Health Schemes
+          </h1>
+          <p className="text-center text-[#4a5d3c] mb-10">
+            Har gaon — har parivaar ke liye zaroori 4 health schemes.
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {govtSchemes.map((s, i) => (
+              <Card
+                key={i}
+                className={`bg-gradient-to-br ${s.color} border border-[#9fb894] shadow-lg rounded-2xl hover:shadow-xl transition-all duration-300`}
+              >
+                <CardHeader>
+                  <CardTitle className="text-2xl font-bold text-[#2f4f32]">{s.name}</CardTitle>
+                  <CardDescription className="text-[#4e633d]">{s.short}</CardDescription>
+                </CardHeader>
+
+                <CardContent className="space-y-2 text-[#3f4b2f]">
+                  <p><strong>Eligibility:</strong> {s.eligibility}</p>
+                  <p><strong>Benefits:</strong> {s.benefit}</p>
+
+                  <Button
+                    asChild
+                    className="mt-2 bg-green-700 hover:bg-green-800 text-white"
+                  >
+                    <a href={s.link} target="_blank">
+                      Visit Website <ExternalLink className="h-4 w-4 ml-1" />
+                    </a>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
 
+
+        {/* ------------------------------------------------------- */}
+        {/* EXISTING SECTION: Aadhaar Eligibility Checker */}
+        {/* ------------------------------------------------------- */}
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Left: Check Eligibility Form */}
+
+          {/* Left: Form */}
           <div>
             <Card>
               <CardHeader>
@@ -55,6 +119,7 @@ const Schemes = () => {
                   Enter your Aadhaar number to check scheme eligibility
                 </CardDescription>
               </CardHeader>
+
               <CardContent>
                 <div className="space-y-4">
                   <div>
@@ -62,11 +127,12 @@ const Schemes = () => {
                     <Input 
                       value={aadhaar}
                       onChange={(e) => setAadhaar(e.target.value.replace(/\D/g, '').slice(0, 12))}
-                      placeholder="Enter 12-digit Aadhaar" 
+                      placeholder="Enter 12-digit Aadhaar"
                       maxLength={12}
                     />
                   </div>
 
+                  {/* DigiLocker Info */}
                   <div className="bg-accent p-4 rounded-lg">
                     <div className="flex items-start gap-2">
                       <FileText className="h-5 w-5 text-primary mt-0.5" />
@@ -75,9 +141,7 @@ const Schemes = () => {
                           DigiLocker Integration
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          We will auto-fetch documents from DigiLocker including Aadhaar, 
-                          income certificate, caste certificate, and residence proof for 
-                          instant eligibility verification.
+                          Aadhaar, income certificate & residence proof auto-fetch hoga.
                         </p>
                       </div>
                     </div>
@@ -94,7 +158,7 @@ const Schemes = () => {
               </CardContent>
             </Card>
 
-            {/* Available Schemes Info */}
+            {/* Available Schemes List */}
             <Card className="mt-6">
               <CardHeader>
                 <CardTitle>Available Schemes</CardTitle>
@@ -126,47 +190,40 @@ const Schemes = () => {
                           <CardTitle className="text-lg">{result.name}</CardTitle>
                           <CardDescription className="mt-1">{result.description}</CardDescription>
                         </div>
+
                         {result.eligible ? (
-                          <Badge variant="success" className="ml-2">
+                          <Badge variant="success">
                             <CheckCircle2 className="h-3 w-3 mr-1" />
                             Eligible
                           </Badge>
                         ) : (
-                          <Badge variant="destructive" className="ml-2">
+                          <Badge variant="destructive">
                             <XCircle className="h-3 w-3 mr-1" />
                             Not Eligible
                           </Badge>
                         )}
                       </div>
                     </CardHeader>
+
                     <CardContent>
                       {result.eligible && (
                         <>
-                          <div className="mb-3">
-                            <p className="text-sm font-medium text-foreground mb-1">Benefits:</p>
-                            <ul className="space-y-1">
-                              {result.benefits.map((benefit: string, idx: number) => (
-                                <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
-                                  <CheckCircle2 className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
-                                  <span>{benefit}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
+                          <p className="text-sm font-medium mb-2">Benefits:</p>
+                          <ul className="space-y-1 mb-3">
+                            {result.benefits.map((benefit, idx) => (
+                              <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
+                                <CheckCircle2 className="h-4 w-4 text-success mt-0.5" />
+                                {benefit}
+                              </li>
+                            ))}
+                          </ul>
 
                           {result.documentsNeeded.length > 0 && (
                             <div className="bg-warning/10 p-3 rounded-lg border border-warning/20">
-                              <div className="flex items-start gap-2">
-                                <AlertCircle className="h-4 w-4 text-warning mt-0.5" />
-                                <div>
-                                  <p className="text-sm font-medium text-foreground">
-                                    Documents Needed:
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {result.documentsNeeded.join(', ')}
-                                  </p>
-                                </div>
-                              </div>
+                              <p className="text-sm font-medium">Documents Needed:</p>
+                              <p className="text-xs text-muted-foreground">
+                                {result.documentsNeeded.join(", ")}
+                              </p>
                             </div>
                           )}
                         </>
@@ -177,9 +234,7 @@ const Schemes = () => {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-96 text-center">
-                <div className="bg-accent p-6 rounded-full mb-4">
-                  <ShieldCheck className="h-12 w-12 text-primary" />
-                </div>
+                <ShieldCheck className="h-12 w-12 text-primary mb-4" />
                 <p className="text-muted-foreground mb-2">
                   Enter your Aadhaar to check eligibility
                 </p>
@@ -190,6 +245,7 @@ const Schemes = () => {
             )}
           </div>
         </div>
+
       </div>
     </div>
   );
