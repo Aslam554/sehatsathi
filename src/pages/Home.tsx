@@ -236,7 +236,7 @@ const Home = () => {
                 asChild
                 variant="outline"
                 size="lg"
-                className="border-white text-white hover:bg-white hover:text-primary"
+                className="border-white text-green hover:bg-white hover:text-primary"
               >
                 <Link to="/features/schemes">सरकारी योजनाएँ देखें</Link>
               </Button>

@@ -1,18 +1,128 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { hospitals } from '@/lib/mockData';
-import { Calendar, Clock, Ticket, Sparkles, MapPin } from 'lucide-react';
+import { Calendar, Clock, Ticket, Star } from 'lucide-react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select';
+
+// 🌍 Extra nearby hospitals with richer info (static demo data)
+const nearbyHospitals = [
+  {
+    name: 'PHC Rampur',
+    address: 'Rampur Main Road, Near Panchayat Bhawan',
+    phone: '+91-98765-10001',
+    timings: '9:00 AM – 4:00 PM',
+    rating: 4.3,
+    reviews: 128,
+    tag: 'Government Hospital',
+    features: ['Free OPD', 'Maternal Care', 'Basic Lab', 'Vaccination']
+  },
+  {
+    name: 'CHC Biswan',
+    address: 'Biswan Road, Bus Stand ke paas',
+    phone: '+91-98765-10002',
+    timings: '24x7 Emergency',
+    rating: 4.6,
+    reviews: 201,
+    tag: 'Emergency Hub',
+    features: ['24x7 Emergency', 'Ambulance', 'X-Ray', 'Minor Surgery']
+  },
+  {
+    name: 'District Hospital Sitapur',
+    address: 'Civil Lines, Sitapur',
+    phone: '+91-98765-10003',
+    timings: '8:00 AM – 8:00 PM',
+    rating: 4.1,
+    reviews: 340,
+    tag: 'Referral Center',
+    features: ['Specialists', 'ICU Support', 'Blood Bank', 'Govt Schemes Desk']
+  },
+  {
+    name: 'Janta Hospital',
+    address: 'Talab Chauraha, Market Road',
+    phone: '+91-98765-10004',
+    timings: '9:00 AM – 9:00 PM',
+    rating: 4.4,
+    reviews: 96,
+    tag: 'Affordable Care',
+    features: ['Low cost OPD', 'Pathology', 'Pharmacy', 'Child Care']
+  },
+  {
+    name: 'Anand Clinic & Maternity Home',
+    address: 'Station Road, Opp. Petrol Pump',
+    phone: '+91-98765-10005',
+    timings: '10:00 AM – 7:00 PM',
+    rating: 4.7,
+    reviews: 152,
+    tag: 'Women & Child',
+    features: ['Gynaecology', 'Child Specialist', 'Ultrasound']
+  },
+  {
+    name: 'Rural Care Centre Khairabad',
+    address: 'Khairabad Bazar, Masjid ke paas',
+    phone: '+91-98765-10006',
+    timings: '8:30 AM – 6:00 PM',
+    rating: 4.2,
+    reviews: 88,
+    tag: 'Rural Focus',
+    features: ['General Physician', 'Tele-Consult', 'Health Camps']
+  },
+  {
+    name: 'Lifeline Emergency Center',
+    address: 'Highway Chauraha, Toll Plaza ke kareeb',
+    phone: '+91-98765-10007',
+    timings: '24x7',
+    rating: 4.8,
+    reviews: 230,
+    tag: 'Critical Care',
+    features: ['24x7 Trauma', 'Ambulance', 'Quick Triage']
+  },
+  {
+    name: 'Sunrise Nursing Home',
+    address: 'Mandir Road, Old Town',
+    phone: '+91-98765-10008',
+    timings: '9:00 AM – 8:30 PM',
+    rating: 4.0,
+    reviews: 74,
+    tag: 'Nursing Home',
+    features: ['Indoor Beds', 'Post-op Care', 'Physiotherapy']
+  },
+  {
+    name: 'Sai MediCare Clinic',
+    address: 'Bus Stand ke saamne, Sai Chowk',
+    phone: '+91-98765-10009',
+    timings: '10:00 AM – 6:30 PM',
+    rating: 4.5,
+    reviews: 119,
+    tag: 'Family Clinic',
+    features: ['Family Physician', 'Diabetes Care', 'BP Monitoring']
+  },
+  {
+    name: 'Arogya Multi-Speciality',
+    address: 'Bypass Road, New Colony',
+    phone: '+91-98765-10010',
+    timings: '9:00 AM – 10:00 PM',
+    rating: 4.6,
+    reviews: 189,
+    tag: 'Multi-Speciality',
+    features: ['Ortho', 'Neuro OPD', 'Cardio OPD']
+  }
+];
 
 const Queues = () => {
   const [selectedHospital, setSelectedHospital] = useState('');
@@ -23,18 +133,43 @@ const Queues = () => {
 
   const selectedHospitalData = hospitals.find((h) => h.id === selectedHospital);
 
+  // 🔐 Load tokens from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('queueTokens');
+      if (stored) {
+        setBookedTokens(JSON.parse(stored));
+      }
+    } catch (err) {
+      console.error('Failed to load tokens from localStorage', err);
+    }
+  }, []);
+
+  // 💾 Save tokens to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('queueTokens', JSON.stringify(bookedTokens));
+    } catch (err) {
+      console.error('Failed to save tokens to localStorage', err);
+    }
+  }, [bookedTokens]);
+
   const handleBookToken = () => {
     if (selectedHospital && selectedDept && patientName && patientPhone) {
       const newToken = {
         id: `TKN${Date.now()}`,
+        hospitalId: selectedHospital,
         hospital: selectedHospitalData?.name,
         department: selectedDept,
-        tokenNumber: Math.floor(Math.random() * 100) + 1,
+        tokenNumber: Math.floor(Math.random() * 90) + 10,
         estimatedWait: selectedHospitalData?.avgWaitTime || 30,
         patient: patientName,
         phone: patientPhone,
+        status: 'Upcoming'
       };
-      setBookedTokens((prev) => [...prev, newToken]);
+
+      setBookedTokens((prev) => [newToken, ...prev]);
+
       // Reset form
       setPatientName('');
       setPatientPhone('');
@@ -42,163 +177,161 @@ const Queues = () => {
     }
   };
 
-  const totalHospitals = hospitals.length;
-  const avgWaitOverall =
-    hospitals.reduce((sum, h) => sum + (h.avgWaitTime || 0), 0) /
-    (hospitals.length || 1);
-  const totalQueue = hospitals.reduce((sum, h) => sum + (h.currentQueue || 0), 0);
+  const getTagColor = (tag: string) => {
+    if (tag.includes('Government')) return 'bg-emerald-100 text-emerald-800';
+    if (tag.includes('Emergency') || tag.includes('Critical'))
+      return 'bg-red-100 text-red-800';
+    if (tag.includes('Affordable')) return 'bg-amber-100 text-amber-800';
+    if (tag.includes('Women')) return 'bg-pink-100 text-pink-800';
+    if (tag.includes('Multi')) return 'bg-blue-100 text-blue-800';
+    return 'bg-slate-100 text-slate-800';
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 via-background to-emerald-50 dark:from-slate-950 dark:via-background dark:to-slate-950">
+    <div className="min-h-screen bg-gradient-to-b from-[#f3f7ed] via-[#e7f0da] to-[#dbe6cd]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="bg-gradient-to-br from-sky-500 to-emerald-500 p-3 rounded-2xl shadow-lg shadow-sky-500/30">
-              <Calendar className="h-7 w-7 text-primary-foreground" />
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="bg-primary p-3 rounded-xl shadow-md">
+              <Calendar className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full bg-sky-100/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-sky-700 dark:bg-sky-900/60 dark:text-sky-100">
-                Smart Queues
-              </p>
-              <h1 className="mt-3 text-3xl lg:text-4xl font-bold tracking-tight text-foreground">
+              <h1 className="text-3xl lg:text-4xl font-bold text-[#2f4f32]">
                 Hospital Queue Token System
               </h1>
-              <p className="mt-1 text-sm sm:text-base text-muted-foreground max-w-xl">
-                Book a digital token, track the queue remotely, and reach the hospital exactly
-                when your turn is near.
-              </p>
-            </div>
-          </div>
-
-          {/* Quick stats */}
-          <div className="grid grid-cols-3 gap-3 max-w-md text-sm">
-            <div className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900/70">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-300">
-                Hospitals
-              </p>
-              <p className="mt-1 text-xl font-semibold text-slate-900 dark:text-slate-50">
-                {totalHospitals}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 px-4 py-3 shadow-sm dark:border-emerald-800 dark:bg-emerald-950/70">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-200">
-                Avg wait
-              </p>
-              <p className="mt-1 text-xl font-semibold text-emerald-900 dark:text-emerald-50">
-                ~{Math.round(avgWaitOverall)} min
-              </p>
-            </div>
-            <div className="rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3 shadow-sm dark:border-amber-800 dark:bg-amber-950/70">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-amber-700 dark:text-amber-200">
-                People in queue
-              </p>
-              <p className="mt-1 text-xl font-semibold text-amber-900 dark:text-amber-50">
-                {totalQueue}
+              <p className="text-[#58745a] text-sm mt-1">
+                Book your turn, skip the physical rush — खासकर ग्रामीण मरीजों के लिए.
               </p>
             </div>
           </div>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Left: Hospital List */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
-                  Available Hospitals
-                  <span className="rounded-full bg-emerald-50 px-2 py-[2px] text-[11px] font-medium text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-100">
-                    Live queues
-                  </span>
-                </h2>
-                <p className="text-xs text-muted-foreground mt-1">
-                  See departments, queue load and approximate waiting time.
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {hospitals.map((hospital) => (
-                <Card
-                  key={hospital.id}
-                  className={`hover:shadow-lg transition-all hover:-translate-y-[2px] cursor-pointer ${
-                    selectedHospital === hospital.id
-                      ? 'border-primary/40 ring-1 ring-primary/30'
-                      : ''
-                  }`}
-                  onClick={() => {
-                    setSelectedHospital(hospital.id);
-                    setSelectedDept(''); // reset dept when hospital changes
-                  }}
-                >
-                  <CardContent className="p-5">
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <h3 className="font-semibold text-foreground text-lg mb-1">
-                            {hospital.name}
-                          </h3>
-                          <p className="text-xs text-muted-foreground flex items-center gap-1">
-                            <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                            {hospital.location}
-                          </p>
-                        </div>
-                        <Badge variant="secondary" className="text-[11px]">
-                          {hospital.currentQueue === 0
-                            ? 'No queue'
-                            : `${hospital.currentQueue} waiting`}
+          {/* Left: Hospital List + Nearby */}
+          <div className="space-y-8">
+            {/* Available Hospitals (from mockData) */}
+            <div>
+              <h2 className="text-xl font-semibold text-foreground mb-4">
+                Live Queue – Partner Hospitals
+              </h2>
+              <div className="space-y-4">
+                {hospitals.map((hospital) => (
+                  <Card
+                    key={hospital.id}
+                    className={`hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${
+                      selectedHospital === hospital.id ? 'ring-2 ring-primary/60' : ''
+                    }`}
+                    onClick={() => setSelectedHospital(hospital.id)}
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold text-foreground text-lg">
+                          {hospital.name}
+                        </h3>
+                        <Badge variant="secondary" className="text-[10px]">
+                          Live Queue
                         </Badge>
                       </div>
-
-                      <div className="flex flex-wrap gap-2">
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {hospital.location}
+                      </p>
+                      <div className="flex flex-wrap gap-2 mb-3">
                         {hospital.departments.map((dept) => (
-                          <Badge
-                            key={dept}
-                            variant="outline"
-                            className="text-[11px] rounded-full px-3 py-1"
-                          >
+                          <Badge key={dept} variant="outline" className="text-[11px]">
                             {dept}
                           </Badge>
                         ))}
                       </div>
-
-                      <div className="mt-1 flex items-center justify-between text-xs sm:text-sm">
+                      <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2 text-foreground">
                           <Ticket className="h-4 w-4 text-muted-foreground" />
-                          <span>
-                            Current Queue:{' '}
-                            <span className="font-medium">{hospital.currentQueue}</span>
-                          </span>
+                          <span>Current Queue: {hospital.currentQueue}</span>
                         </div>
                         <div className="flex items-center gap-2 text-foreground">
                           <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>
-                            ~<span className="font-medium">{hospital.avgWaitTime}</span> min
-                          </span>
+                          <span>~{hospital.avgWaitTime} min</span>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* Nearby Hospitals – richer info */}
+            <div>
+              <h2 className="text-xl font-semibold text-foreground mb-4">
+                Nearby Hospitals & Rankings
+              </h2>
+              <div className="grid md:grid-cols-2 gap-4">
+                {nearbyHospitals.map((h, idx) => (
+                  <Card
+                    key={h.name}
+                    className="hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white/90 border border-[#b7c9a5] fade-in-up"
+                    style={{ animationDelay: `${idx * 70}ms` }}
+                  >
+                    <CardContent className="p-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <p className="font-semibold text-sm text-[#2f4f32]">{h.name}</p>
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${getTagColor(
+                            h.tag
+                          )}`}
+                        >
+                          {h.tag}
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#5b6a4a]">{h.address}</p>
+                      <p className="text-xs text-[#3f4b2f]">
+                        📞 <span className="font-mono">{h.phone}</span>
+                      </p>
+                      <p className="text-xs text-[#3f4b2f]">⏰ {h.timings}</p>
+
+                      <div className="flex items-center gap-1 text-xs mt-1">
+                        <Star className="h-3 w-3 text-amber-500 fill-amber-400" />
+                        <span className="font-semibold">{h.rating.toFixed(1)}</span>
+                        <span className="text-[10px] text-muted-foreground">
+                          ({h.reviews} reviews)
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {h.features.map((f) => (
+                          <span
+                            key={f}
+                            className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800"
+                          >
+                            {f}
+                          </span>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           </div>
 
           {/* Right: Token Booking Form + My Tokens */}
           <div className="space-y-6">
-            <Card className="border-none bg-gradient-to-br from-white via-background to-emerald-50 shadow-lg dark:from-slate-950 dark:via-slate-950 dark:to-emerald-950/50">
+            {/* Booking Form */}
+            <Card className="shadow-lg">
               <CardHeader>
                 <CardTitle>Book Queue Token</CardTitle>
                 <CardDescription>
-                  Reserve your turn and arrive closer to your expected token time.
+                  Reserve your spot in the hospital queue (demo simulation).
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Select Hospital</Label>
-                    <Select value={selectedHospital} onValueChange={setSelectedHospital}>
-                      <SelectTrigger className="bg-background/80">
+                    <Select
+                      value={selectedHospital}
+                      onValueChange={setSelectedHospital}
+                    >
+                      <SelectTrigger>
                         <SelectValue placeholder="Choose hospital" />
                       </SelectTrigger>
                       <SelectContent>
@@ -263,7 +396,7 @@ const Queues = () => {
                     disabled={
                       !selectedHospital || !selectedDept || !patientName || !patientPhone
                     }
-                    className="w-full gap-2 rounded-full"
+                    className="w-full"
                   >
                     <Ticket className="h-4 w-4" />
                     Book Token
@@ -278,11 +411,11 @@ const Queues = () => {
 
             {/* My Tokens */}
             {bookedTokens.length > 0 && (
-              <Card className="border-none bg-gradient-to-br from-emerald-50 via-background to-sky-50 dark:from-emerald-950/40 dark:via-slate-950 dark:to-sky-950/40">
+              <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle>My Tokens</CardTitle>
                   <CardDescription>
-                    Keep this page open to quickly check your token &amp; waiting time.
+                    Saved in this browser (local storage) – demo tokens.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -290,23 +423,26 @@ const Queues = () => {
                     {bookedTokens.map((token) => (
                       <div
                         key={token.id}
-                        className="bg-accent/70 p-4 rounded-2xl border border-border/60"
+                        className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 p-4 rounded-xl flex flex-col gap-1 token-slide"
                       >
-                        <div className="flex items-center justify-between mb-2 gap-3">
-                          <Badge variant="success" className="rounded-full px-3 py-1 text-[11px]">
+                        <div className="flex items-center justify-between">
+                          <Badge variant="success">
                             Token #{token.tokenNumber}
                           </Badge>
-                          <span className="text-[11px] text-muted-foreground">{token.id}</span>
+                          <span className="text-[10px] text-muted-foreground">
+                            {token.id}
+                          </span>
                         </div>
-                        <p className="text-sm font-medium text-foreground">{token.hospital}</p>
-                        <p className="text-xs text-muted-foreground">{token.department}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Patient: <span className="font-medium">{token.patient}</span> •{' '}
-                          {token.phone}
+                        <p className="text-sm font-semibold text-[#23402a]">
+                          {token.hospital}
                         </p>
-                        <p className="text-xs text-foreground mt-2">
+                        <p className="text-xs text-[#4d5b3c]">{token.department}</p>
+                        <p className="text-xs text-[#3b4a32] mt-1">
+                          👤 {token.patient} • 📞 {token.phone}
+                        </p>
+                        <p className="text-xs text-[#23402a] mt-1">
                           Estimated wait:{' '}
-                          <strong>~{token.estimatedWait} minutes</strong>
+                          <strong>~{token.estimatedWait} min</strong>
                         </p>
                       </div>
                     ))}
@@ -317,6 +453,39 @@ const Queues = () => {
           </div>
         </div>
       </div>
+
+      {/* Small CSS animations for fade-in cards + token slide */}
+      <style>
+        {`
+          @keyframes fadeInUp {
+            from {
+              opacity: 0;
+              transform: translateY(8px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          .fade-in-up {
+            animation: fadeInUp 0.5s ease-out both;
+          }
+
+          @keyframes tokenSlide {
+            from {
+              opacity: 0;
+              transform: translateX(12px);
+            }
+            to {
+              opacity: 1;
+              transform: translateX(0);
+            }
+          }
+          .token-slide {
+            animation: tokenSlide 0.4s ease-out;
+          }
+        `}
+      </style>
     </div>
   );
 };
